@@ -52,7 +52,7 @@ class NewsScraperApp:
 
         # Lista dropdown, momentan e doar pentru un element
         #daca creezi functii noi trebuie sa modifici lista
-        site_label = tk.Label(master, text="Sursă:", font=("Arial", 12))
+        site_label = ttk.Label(master, text="Sursă:", font=("Arial", 12))
         site_label.pack(pady=5)
 
         self.site_var = tk.StringVar(value="Digi24")
@@ -66,17 +66,23 @@ class NewsScraperApp:
         # fill=tk.BOTH -> umple spațiul și pe orizontală și pe verticală
         # expand=True  -> permite widget-ului să ocupe spațiul suplimentar generat la redimensionare
         self.text_box.pack(pady=10, padx=50, fill=tk.BOTH, expand=True)
-        self.text_box.insert(tk.END, "\t\t\tPress Find Article")
+
+        # lista de tag-uri pt stilul textului
+        self.text_box.tag_configure("Titlu", justify='center', font=("times new roman", 24, "bold"))
+        self.text_box.tag_configure("SursaTag", font=("times new roman", 14, "italic"))
+        self.text_box.tag_configure("ContinutTag", font=("times new roman", 16))
+
+        self.text_box.insert(tk.END, "Apasati Cauta Articol", "Titlu")
 
         # BUTOANE
         button_frame = tk.Frame(master)
         button_frame.pack(pady=10)
 
-        self.load_btn = tk.Button(button_frame, text="Find Article", width=20,
+        self.load_btn = ttk.Button(button_frame, text="Cauta articol", width=20,
                                   command=self.start_scraper_thread)
         self.load_btn.grid(row=0, column=0, padx=10)
 
-        self.source_btn = tk.Button(button_frame, text="Show source link", width=20,
+        self.source_btn = ttk.Button(button_frame, text="Sursa??? (nu te cred)", width=20,
                                     command=self.show_source)
         self.source_btn.grid(row=0, column=1, padx=10)
 
@@ -84,9 +90,9 @@ class NewsScraperApp:
     #evita blocarea interfetei
     def start_scraper_thread(self):
         site = self.site_var.get()
-        self.load_btn.config(state=tk.DISABLED, text="Loading")
+        self.load_btn.config(state=tk.DISABLED, text="ASTEAPTA BAAAA!!!")
         self.text_box.delete("1.0", tk.END)
-        self.text_box.insert(tk.END, "Loading. Please wait\n")
+        self.text_box.insert(tk.END, "Se incarca. Va rugam sa asteptati...\n", "Titlu")
 
         # thread start
         scraper_thread = threading.Thread(target=self.run_scraper, args=(site,))
@@ -108,10 +114,10 @@ class NewsScraperApp:
         self.current_article["site"] = site
 
         self.text_box.delete("1.0", tk.END)
-        self.text_box.insert(tk.END, f"Sursa: {site}\n")
-        self.text_box.insert(tk.END, f"Titlu: {self.current_article['title']}\n\n", ("header", "bold"))
-        self.text_box.insert(tk.END, f"{self.current_article['content']}\n\n")
-        self.text_box.insert(tk.END, f"Link: {self.current_article['link']}\n")
+        self.text_box.insert(tk.END, f"Sursa: {site}\n", "SursaTag")
+        self.text_box.insert(tk.END, f"{self.current_article['title']}\n\n", "Titlu")
+        self.text_box.insert(tk.END, f"{self.current_article['content']}\n\n", "ContinutTag")
+        self.text_box.insert(tk.END, f"Link: {self.current_article['link']}\n", "SursaTag")
 
         self.load_btn.config(state=tk.NORMAL, text="Find article")
 
@@ -133,7 +139,7 @@ class NewsScraperApp:
             return
 
         self.text_box.delete("1.0", tk.END)
-        self.text_box.insert(tk.END, f"Source {site}:\n{link}")
+        self.text_box.insert(tk.END, f"Source {site}:\n{link}", "SursaTag")
 
 
 if __name__ == "__main__":
