@@ -62,7 +62,10 @@ class NewsScraperApp:
 
         # zona text pentru articol
         self.text_box = scrolledtext.ScrolledText(master, width=100, height=25, font=("times new roman", 12))
-        self.text_box.pack(pady=10)
+
+        # fill=tk.BOTH -> umple spațiul și pe orizontală și pe verticală
+        # expand=True  -> permite widget-ului să ocupe spațiul suplimentar generat la redimensionare
+        self.text_box.pack(pady=10, padx=50, fill=tk.BOTH, expand=True)
         self.text_box.insert(tk.END, "\t\t\tPress Find Article")
 
         # BUTOANE
