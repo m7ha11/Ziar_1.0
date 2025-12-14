@@ -61,7 +61,7 @@ class NewsScraperApp:
         self.site_dropdown.pack(pady=5)
 
         # zona text pentru articol
-        self.text_box = scrolledtext.ScrolledText(master, width=100, height=25, font=("times new roman", 12))
+        self.text_box = scrolledtext.ScrolledText(master, wrap="word", width=100, height=25, font=("times new roman", 12))
 
         # fill=tk.BOTH -> umple spațiul și pe orizontală și pe verticală
         # expand=True  -> permite widget-ului să ocupe spațiul suplimentar generat la redimensionare
@@ -75,7 +75,7 @@ class NewsScraperApp:
         self.text_box.insert(tk.END, "Apasati Cauta Articol", "Titlu")
 
         # BUTOANE
-        button_frame = tk.Frame(master)
+        button_frame = ttk.Frame(master)
         button_frame.pack(pady=10)
 
         self.load_btn = ttk.Button(button_frame, text="Cauta articol", width=20,
@@ -86,9 +86,12 @@ class NewsScraperApp:
                                     command=self.show_source)
         self.source_btn.grid(row=0, column=1, padx=10)
 
-    # functie care rulează scraper-ul într-un thread separat
-    #evita blocarea interfetei
-    def start_scraper_thread(self):
+        self.source_btn = ttk.Button(button_frame, text="Stirile zilei", width=20,
+                                     command=self.start_all_news)
+        self.source_btn.grid(row=0, column=2, padx=10)
+
+    #functie care ruleaza si afiseaza o stire din fiecare sursa
+    def start_all_news(self):
         site = self.site_var.get()
         self.load_btn.config(state=tk.DISABLED, text="ASTEAPTA BAAAA!!!")
         self.text_box.delete("1.0", tk.END)
@@ -97,6 +100,22 @@ class NewsScraperApp:
         # thread start
         scraper_thread = threading.Thread(target=self.run_scraper, args=(site,))
         scraper_thread.start()
+        #ruleaza in loop toate sursele de stiri
+
+    # functie care rulează scraper-ul într-un thread separat
+    #evita blocarea interfetei
+    def start_scraper_thread(self):
+        self.load_btn.config(state=tk.DISABLED, text="ASTEAPTA BAAAA!!!")
+        self.text_box.delete("1.0", tk.END)
+        self.text_box.insert(tk.END, "Se incarca. Va rugam sa asteptati...\n", "Titlu")
+        time.sleep(3)
+        self.text_box.delete("1.0", tk.END)
+
+        # thread start
+        for sites in SCRAPERS:
+            site = self.sites.get()
+            scraper_thread = threading.Thread(target=self.run_scraper, args=(site,))
+            scraper_thread.start()
 
     # functie rulata de thread (executa selenium)
     def run_scraper(self, site):
@@ -116,10 +135,24 @@ class NewsScraperApp:
         self.text_box.delete("1.0", tk.END)
         self.text_box.insert(tk.END, f"Sursa: {site}\n", "SursaTag")
         self.text_box.insert(tk.END, f"{self.current_article['title']}\n\n", "Titlu")
-        self.text_box.insert(tk.END, f"{self.current_article['content']}\n\n", "ContinutTag")
+        self.text_box.insert(tk.END, f"\t{self.current_article['content']}\n\n", "ContinutTag")
         self.text_box.insert(tk.END, f"Link: {self.current_article['link']}\n", "SursaTag")
 
         self.load_btn.config(state=tk.NORMAL, text="Find article")
+
+    #functie care adauga text in continoare
+    def add_gui_success(self, site, data):
+        self.current_article = data
+        self.current_article["site"] = site
+
+        self.text_box.insert(tk.END, f"Sursa: {site}\n", "SursaTag")
+        self.text_box.insert(tk.END, f"{self.current_article['title']}\n\n", "Titlu")
+        self.text_box.insert(tk.END, f"\t{self.current_article['content']}\n\n", "ContinutTag")
+        self.text_box.insert(tk.END, f"Link: {self.current_article['link']}\n", "SursaTag")
+        self.text_box.insert(tk.END, f"\n\n\n")
+
+        self.load_btn.config(state=tk.NORMAL, text="Find article")
+        ##doar adauga in continuare in loc sa stearga ce e pe ecran inainte
 
     # functie pentru actualizarea GUI dupa eroare
     def update_gui_error(self, error_msg):

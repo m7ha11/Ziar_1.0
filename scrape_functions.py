@@ -77,7 +77,7 @@ def scrape_digi24():
 
         # 4. extrage paragrafe
         paragraphs = driver.find_elements(By.CSS_SELECTOR, "main article p, h2")
-        data["content"] = "\n\n".join([p.text for p in paragraphs if p.text])
+        data["content"] = "\n\t".join([p.text for p in paragraphs if p.text])
 
         if not data["content"]:
             data["content"] = "error fara continut extras"
