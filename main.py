@@ -97,14 +97,13 @@ class NewsScraperApp:
         self.text_box.delete("1.0", tk.END)
         self.text_box.insert(tk.END, "Se incarca. Va rugam sa asteptati...\n", "Titlu")
 
+        self.active_threads=len(SCRAPERS)
+
         # thread start
         for sites in SCRAPERS:
             #site = self.sites.get()
             scraper_thread = threading.Thread(target=self.special_run_scraper, args=(sites,))
             scraper_thread.start()
-
-        self.text_box.delete("1.0", "2.0")
-
         #ruleaza in loop toate sursele de stiri
 
     # functie care rulează scraper-ul într-un thread separat
@@ -164,7 +163,10 @@ class NewsScraperApp:
         self.text_box.insert(tk.END, f"Link: {self.current_article['link']}\n", "SursaTag")
         self.text_box.insert(tk.END, f"\n\n\n")
 
-        self.full_load_btn.config(state=tk.NORMAL, text="Stirile Zilei")
+        self.active_threads -= 1
+        if self.active_threads == 0:
+            self.text_box.delete("1.0", "2.0")
+            self.full_load_btn.config(state=tk.NORMAL, text="Stirile Zilei")
         ##doar adauga in continuare in loc sa stearga ce e pe ecran inainte
 
     # functie pentru actualizarea GUI dupa eroare
